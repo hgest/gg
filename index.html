@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>网页归档 | 星辰 Star Sky</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg-elevated: #12121a;
+      --surface: #181822;
+      --surface-hover: #20202c;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f5f5f7;
+      --text-muted: #8a8a98;
+      --accent: #c9963a;
+      --accent-soft: rgba(201, 150, 58, 0.12);
+      --radius: 20px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Noto Serif SC", Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+
+    /* Background */
+    .bg-glow {
+      position: fixed;
+      top: -30%;
+      right: -20%;
+      width: 80%;
+      height: 80%;
+      background: radial-gradient(circle, rgba(201, 150, 58, 0.1) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      left: -20%;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.07) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px 0;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    .nav.visible {
+      opacity: 1;
+      transform: translateY(0);
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .logo span {
+      color: var(--accent);
+      font-family: "Playfair Display", Georgia, serif;
+      font-style: italic;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+
+    .hero-content {
+      max-width: 800px;
+    }
+
+    .hero-label {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 100px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(201, 150, 58, 0.25);
+      color: var(--accent);
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      margin-bottom: 40px;
+    }
+
+    .hero h1 {
+      font-size: clamp(48px, 10vw, 96px);
+      font-weight: 600;
+      line-height: 1.05;
+      margin-bottom: 16px;
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 .en {
+      display: block;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 0.55em;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-top: 8px;
+    }
+
+    .hero p {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 48px;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      animation: bounce 2s infinite;
+    }
+
+    .scroll-hint svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+      40% { transform: translateX(-50%) translateY(-10px); }
+      60% { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    /* Stats */
+    .stats {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 32px 24px;
+    }
+
+    .stat-num {
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 12px;
+      font-family: "Playfair Display", Georgia, serif;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 14px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Sections */
+    .main {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 120px 24px;
+    }
+
+    .section {
+      margin-bottom: 120px;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      margin-bottom: 48px;
+    }
+
+    .section-label {
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 17px;
+      max-width: 560px;
+    }
+
+    /* Cards grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      min-height: 260px;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201, 150, 58, 0.5), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(201, 150, 58, 0.3);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card-tag {
+      display: inline-flex;
+      align-self: flex-start;
+      padding: 4px 12px;
+      border-radius: 100px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      line-height: 1.35;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .card-arrow {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .card-arrow svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover .card-arrow svg {
+      transform: translateX(4px);
+    }
+
+    /* Quick links */
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s ease;
+    }
+
+    .quick-link:hover {
+      border-color: rgba(201, 150, 58, 0.3);
+      background: var(--surface-hover);
+    }
+
+    .quick-link-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .quick-link-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .quick-link-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .quick-link-desc {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .quick-link-arrow {
+      color: var(--accent);
+    }
+
+    /* Footer */
+    .footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 80px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .footer-brand {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .footer-brand span {
+      color: var(--accent);
+      font-family: "Playfair Display", Georgia, serif;
+      font-style: italic;
+    }
+
+    /* Animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 900px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .quick-links {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .hero {
+        padding: 100px 20px 80px;
+      }
+
+      .main {
+        padding: 80px 20px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        margin-bottom: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="bg-glow-2"></div>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="logo" href="#">星辰 <span>Star Sky</span></a>
+      <div class="nav-links">
+        <a href="#ai">AI</a>
+        <a href="#product">产品</a>
+        <a href="#service">服务</a>
+        <a href="#about">关于我</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-label">✨ 网页归档汇总</div>
+      <h1>
+        星辰
+        <span class="en">Star Sky</span>
+      </h1>
+      <p>只有在路上的我，才是真我。这里汇集了 AI 探索、产品实践、服务沉淀与个人故事。</p>
+    </div>
+
+    <div class="scroll-hint">
+      <span>向下滚动</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M19 12l-7 7-7-7"/>
+      </svg>
+    </div>
+  </header>
+
+  <section class="stats">
+    <div class="stat-item">
+      <div class="stat-num">6</div>
+      <div class="stat-label">归档文档</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">4</div>
+      <div class="stat-label">主题分类</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">在路上</div>
+    </div>
+  </section>
+
+  <main class="main">
+    <!-- AI -->
+    <section class="section fade-in" id="ai">
+      <div class="section-header">
+        <div class="section-label">Artificial Intelligence</div>
+        <h2 class="section-title">AI</h2>
+        <p class="section-desc">AI 工具、教程与自动化实践，探索如何用人工智能放大个人生产力。</p>
+      </div>
+      <div class="cards">
+        <a class="card" href="Token中转站.html" target="_blank">
+          <div class="card-icon">🤖</div>
+          <span class="card-tag">Token 中转</span>
+          <h3 class="card-title">Claude Code 满血版额度服务</h3>
+          <p class="card-desc">额度永不过期，支持 Claude Code Sonnet / Opus 4.7，模型可联网搜索，随时可用。</p>
+          <div class="card-arrow">
+            查看详情
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a class="card" href="personal-website-guide.html" target="_blank">
+          <div class="card-icon">🌐</div>
+          <span class="card-tag">网页制作</span>
+          <h3 class="card-title">用 AI + GitHub + Netlify 打造数字名片</h3>
+          <p class="card-desc">11 步图文教程，无需编程基础，从零开始部署完全属于自己的独立网站。</p>
+          <div class="card-arrow">
+            查看详情
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a class="card" href="公众号运营2.html" target="_blank">
+          <div class="card-icon">✍️</div>
+          <span class="card-tag">公众号</span>
+          <h3 class="card-title">用 AI 做自媒体实现全流程自动化</h3>
+          <p class="card-desc">从信息来源、知识管理、内容排版到自动发布，用 AI 搭建自媒体自动化工作流。</p>
+          <div class="card-arrow">
+            查看详情
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Product -->
+    <section class="section fade-in" id="product">
+      <div class="section-header">
+        <div class="section-label">Products</div>
+        <h2 class="section-title">产品</h2>
+        <p class="section-desc">正在探索的产品与体验，从一杯酒开始的生活方式实验。</p>
+      </div>
+      <div class="cards">
+        <a class="card" href="红酒葡野2.html" target="_blank">
+          <div class="card-icon">🍷</div>
+          <span class="card-tag">品酒会</span>
+          <h3 class="card-title">红酒葡野</h3>
+          <p class="card-desc">从一杯酒、到一群人、再到一份事业。葡萄酒品鉴与创业联盟的优雅呈现。</p>
+          <div class="card-arrow">
+            查看详情
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Service -->
+    <section class="section fade-in" id="service">
+      <div class="section-header">
+        <div class="section-label">Services</div>
+        <h2 class="section-title">服务</h2>
+        <p class="section-desc">为职场人提供的实用支持与法律常识，帮助你在关键时刻保护自己。</p>
+      </div>
+      <div class="cards">
+        <a class="card" href="职场n+1 3.html" target="_blank">
+          <div class="card-icon">🛡️</div>
+          <span class="card-tag">职场 n+1</span>
+          <h3 class="card-title">公司想赶你走却不赔钱？</h3>
+          <p class="card-desc">拆解公司常用手段、劳动法律知识、仲裁策略与现在就应该做的几件事。</p>
+          <div class="card-arrow">
+            查看详情
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="section fade-in" id="about">
+      <div class="section-header">
+        <div class="section-label">About Me</div>
+        <h2 class="section-title">关于我</h2>
+        <p class="section-desc">我的故事，讲经历为主。从技术到商业，一路探索的足迹。</p>
+      </div>
+      <div class="cards">
+        <a class="card" href="关于我_HTML/index.html" target="_blank">
+          <div class="card-icon">👤</div>
+          <span class="card-tag">个人故事</span>
+          <h3 class="card-title">从技术到商业</h3>
+          <p class="card-desc">一个工科生十年职业探索：从土木、煤矿、材料、储能到 AI 与商业，最终找到连接资源、帮助他人的长期事业。</p>
+          <div class="card-arrow">
+            查看详情
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-brand">星辰 <span>Star Sky</span></div>
+    <p>网页归档汇总 · 所有文档均来自 C:\Users\14486\Desktop\网页归档</p>
+  </footer>
+
+  <script>
+    // Nav visibility on scroll
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        nav.classList.add('visible');
+      } else {
+        nav.classList.remove('visible');
+      }
+    });
+
+    // Fade in animations
+    const fadeElements = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    fadeElements.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
